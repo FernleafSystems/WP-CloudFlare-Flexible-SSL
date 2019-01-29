@@ -1,22 +1,20 @@
 <?php
 /*
- * Plugin Name: CloudFlare Flexible SSL
- * Plugin URI: http://icwp.io/2f
+ * Plugin Name: Cloudflare Flexible SSL
+ * Plugin URI: https://icwp.io/cloudflaresslpluginauthor
  * Description: Fix For CloudFlare Flexible SSL Redirect Loop For WordPress
- * Version: 1.2.2
+ * Version: 1.3.0
  * Text Domain: cloudflare-flexible-ssl
- * Author: iControlWP
- * Author URI: http://icwp.io/2e
+ * Author: One Dollar Plugin
+ * Author URI: https://icwp.io/cloudflaresslpluginauthor
  */
 
 /**
- * Copyright (c) 2016 iControlWP <support@icontrolwp.com>
+ * Copyright (c) 2019 One Dollar Plugin <emails@onedollarplugin.com>
  * All rights reserved.
- *
  * "CloudFlare Flexible SSL" plugin is distributed under the GNU General Public License, Version 2,
  * June 1991. Copyright (C) 1989, 1991 Free Software Foundation, Inc., 51 Franklin
  * St, Fifth Floor, Boston, MA 02110, USA
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,22 +28,41 @@
  */
 class ICWP_Cloudflare_Flexible_SSL {
 
-	public function __construct() {}
+	public function __construct() {
+	}
 
 	public function run() {
+		if ( !$this->isSsl() && $this->isSslToNonSslProxy() ) {
+			$_SERVER[ 'HTTPS' ] = 'on';
+			add_action( 'shutdown', array( $this, 'maintainPluginLoadPosition' ) );
+		}
+		if ( version_compare( PHP_VERSION, '5.4.0', '>=' ) ) {
+			include_once( dirname( __FILE__ ).'/shieldprom.php' );
+		}
+	}
 
-		$aIcwpHttpsServerOpts = array( 'HTTP_CF_VISITOR', 'HTTP_X_FORWARDED_PROTO' );
-		foreach( $aIcwpHttpsServerOpts as $sOption ) {
+	/**
+	 * @return bool
+	 */
+	private function isSsl() {
+		return function_exists( 'is_ssl' ) && is_ssl();
+	}
 
-			if ( isset( $_SERVER[ $sOption ] ) && ( strpos( $_SERVER[ $sOption ], 'https' ) !== false ) ) {
-				$_SERVER[ 'HTTPS' ] = 'on';
+	/**
+	 * @return bool
+	 */
+	private function isSslToNonSslProxy() {
+		$bIsProxy = false;
+
+		$aServerKeys = array( 'HTTP_CF_VISITOR', 'HTTP_X_FORWARDED_PROTO' );
+		foreach ( $aServerKeys as $sKey ) {
+			if ( isset( $_SERVER[ $sKey ] ) && ( strpos( $_SERVER[ $sKey ], 'https' ) !== false ) ) {
+				$bIsProxy = true;
 				break;
 			}
 		}
 
-		if ( is_admin() ) {
-			add_action( 'admin_init', array( $this, 'maintainPluginLoadPosition') );
-		}
+		return $bIsProxy;
 	}
 
 	/**
@@ -63,7 +80,7 @@ class ICWP_Cloudflare_Flexible_SSL {
 	 * @param string $sPluginFile
 	 * @return int
 	 */
-	public function getActivePluginLoadPosition( $sPluginFile ) {
+	private function getActivePluginLoadPosition( $sPluginFile ) {
 		$sOptionKey = is_multisite() ? 'active_sitewide_plugins' : 'active_plugins';
 		$aActive = get_option( $sOptionKey );
 		$nPosition = -1;
@@ -78,9 +95,9 @@ class ICWP_Cloudflare_Flexible_SSL {
 
 	/**
 	 * @param string $sPluginFile
-	 * @param int $nDesiredPosition
+	 * @param int    $nDesiredPosition
 	 */
-	public function setActivePluginLoadPosition( $sPluginFile, $nDesiredPosition = 0 ) {
+	private function setActivePluginLoadPosition( $sPluginFile, $nDesiredPosition = 0 ) {
 
 		$aActive = $this->setArrayValueToPosition( get_option( 'active_plugins' ), $sPluginFile, $nDesiredPosition );
 		update_option( 'active_plugins', $aActive );
@@ -94,10 +111,10 @@ class ICWP_Cloudflare_Flexible_SSL {
 	/**
 	 * @param array $aSubjectArray
 	 * @param mixed $mValue
-	 * @param int $nDesiredPosition
+	 * @param int   $nDesiredPosition
 	 * @return array
 	 */
-	public function setArrayValueToPosition( $aSubjectArray, $mValue, $nDesiredPosition ) {
+	private function setArrayValueToPosition( $aSubjectArray, $mValue, $nDesiredPosition ) {
 
 		if ( $nDesiredPosition < 0 || !is_array( $aSubjectArray ) ) {
 			return $aSubjectArray;
