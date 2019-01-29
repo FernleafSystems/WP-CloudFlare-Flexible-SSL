@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: CloudFlare, SSL, Flexible SSL, Universal SSL, redirect loop, HTTPS, HTTP_X_FORWARDED_PROTO
 Requires at least: 3.2.0
 Tested up to: 4.5
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 
 Fix For CloudFlare Flexible SSL Redirect Loop For WordPress.
 

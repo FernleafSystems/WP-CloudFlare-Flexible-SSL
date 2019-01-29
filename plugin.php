@@ -1,9 +1,9 @@
 <?php
 /*
- * Plugin Name: CloudFlare Flexible SSL
- * Plugin URI: http://icwp.io/2f
+ * Plugin Name: Cloudflare Flexible SSL
+ * Plugin URI: https://icwp.io/cloudflaresslpluginauthor
  * Description: Fix For CloudFlare Flexible SSL Redirect Loop For WordPress
- * Version: 1.2.2
+ * Version: 1.3.0
  * Text Domain: cloudflare-flexible-ssl
  * Author: One Dollar Plugin
  * Author URI: https://icwp.io/cloudflaresslpluginauthor
